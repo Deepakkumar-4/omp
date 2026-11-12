@@ -1,0 +1,111 @@
+# ==============================================================================
+# MASTER TEST MAKEFILE: TESTS ALL OPENMP ALGORITHMS IN THIS PROJECT
+# Usage:
+#   make -f Makefile.test_all          (runs all test suites)
+#   make -f Makefile.test_all test-csr
+#   make -f Makefile.test_all test-gol
+#   make -f Makefile.test_all test-graphs
+#   make -f Makefile.test_all test-standard
+#   make -f Makefile.test_all test-extra
+#   make -f Makefile.test_all test-labs
+# ==============================================================================
+
+CXX = g++
+CXXFLAGS = -O3 -fopenmp -std=c++17 -Wall -Wextra
+
+.PHONY: all test-all test-env test-csr test-gol test-graphs test-standard test-extra test-labs clean
+
+all: test-all
+
+test-all: test-env test-csr test-gol test-graphs test-standard test-extra test-labs
+	@echo ""
+	@echo "========================================================================"
+	@echo "                   ALL ALGORITHM SUITES PASSED!"
+	@echo "========================================================================"
+
+# 1. System & OpenMP Runtime Diagnostics
+test-env:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[1/7] TESTING OPENMP PRAGMAS, FUNCTIONS & RUNTIME ENVIRONMENT"
+	@echo "========================================================================"
+	$(CXX) $(CXXFLAGS) check_openmp.cpp -o check_openmp.exe
+	./check_openmp.exe
+
+# 2. Parallel CSR Creation & SpMV
+test-csr:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[2/7] TESTING PARALLEL CSR CREATION & SPMV"
+	@echo "========================================================================"
+	$(MAKE) -C CSR_Parallel clean
+	$(MAKE) -C CSR_Parallel
+	./CSR_Parallel/csr_benchmark.exe 10000 200000 4
+
+# 3. Conway's Game of Life
+test-gol:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[3/7] TESTING CONWAY'S GAME OF LIFE (SERIAL VS PARALLEL)"
+	@echo "========================================================================"
+	$(MAKE) -C Game_Of_Life clean
+	$(MAKE) -C Game_Of_Life
+	./Game_Of_Life/game_of_life.exe 512 25 4
+
+# 4. CSR Graph Algorithms (BFS, PageRank, SSSP, Connected Components)
+test-graphs:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[4/7] TESTING CSR GRAPH ALGORITHMS (BFS, PageRank, SSSP, CC)"
+	@echo "========================================================================"
+	$(MAKE) -C graph_algorithms clean
+	$(MAKE) -C graph_algorithms
+	./graph_algorithms/graph_benchmark.exe 10000 15 4
+
+# 5. OpenMP Standard Algorithms (Searching, Arrays, Sorting, Matrices, Recursion)
+test-standard:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[5/7] TESTING OPENMP STANDARD ALGORITHMS"
+	@echo "========================================================================"
+	$(MAKE) -C OpenMP_Standard_Algorithms clean
+	$(MAKE) -C OpenMP_Standard_Algorithms test
+
+# 6. OpenMP Extra Algorithms (Histogram, Prefix Sum, Dot Product, Prime Count, etc.)
+test-extra:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[6/7] TESTING OPENMP EXTRA ALGORITHMS"
+	@echo "========================================================================"
+	$(MAKE) -C OpenMP_Extra_Algorithms clean
+	$(MAKE) -C OpenMP_Extra_Algorithms test
+
+# 7. University Lab Tasks (Labs 7, 8, 9)
+test-labs:
+	@echo ""
+	@echo "========================================================================"
+	@echo "[7/7] TESTING LAB ASSIGNMENTS (LAB 7, LAB 8, LAB 9)"
+	@echo "========================================================================"
+	@echo "--- CS LAB 7 ---"
+	$(MAKE) -C "CS LAB 7" clean
+	$(MAKE) -C "CS LAB 7" task1
+	./"CS LAB 7"/task1 100000 4 1
+	@echo "--- CS LAB 8 ---"
+	$(MAKE) -C "CS LAB 8" clean
+	$(MAKE) -C "CS LAB 8" task1
+	./"CS LAB 8"/task1 100000 4
+	@echo "--- CS LAB 9 ---"
+	$(MAKE) -C "CS LAB 9" clean
+	$(MAKE) -C "CS LAB 9" task1
+	./"CS LAB 9"/task1 50000 4 1024
+
+clean:
+	rm -f check_openmp.exe *.o
+	$(MAKE) -C CSR_Parallel clean
+	$(MAKE) -C Game_Of_Life clean
+	$(MAKE) -C graph_algorithms clean
+	$(MAKE) -C OpenMP_Standard_Algorithms clean
+	$(MAKE) -C OpenMP_Extra_Algorithms clean
+	$(MAKE) -C "CS LAB 7" clean
+	$(MAKE) -C "CS LAB 8" clean
+	$(MAKE) -C "CS LAB 9" clean
